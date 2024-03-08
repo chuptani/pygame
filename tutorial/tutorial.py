@@ -1,17 +1,28 @@
 import pygame
 from sys import exit
 
+
 pygame.init()
+
+# just to know (ms)
+current_time = pygame.time.get_ticks()
 
 width, height = 800, 400
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Game")
 clock = pygame.time.Clock()
 
-test_score = pygame.font.Font('font/Pixeltype.ttf', 50)
+test_font = pygame.font.Font('font/Pixeltype.ttf', 50)
 
 sky_surface = pygame.image.load('graphics/Sky.png').convert()
 ground_surface = pygame.image.load('graphics/ground.png')
+
+bg_surface = pygame.Surface((width,height))
+bg_rect = bg_surface.get_rect(top=0)
+bg_surface.fill((94,129,162))
+bg_alpha = -20
+bg_change = 0.3
+
 
 snail_surface = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
 snail_rect = snail_surface.get_rect(midbottom = (800, 300))
@@ -50,17 +61,11 @@ while True:
                 if event.key == pygame.K_SPACE :
                     game = True
 
+
     if game :
         screen.blit(sky_surface, (0, 0))
         screen.blit(ground_surface, (0, 300))
 
-        score_surf = test_score.render(f"Score : {score}", False, 'White').convert()
-        score_rect = score_surf.get_rect(centerx = width//2, top = 10)
-        score_border = score_rect.inflate(10, 5)
-        score_border.y -= 5
-        score_border.x -= 2
-        pygame.draw.rect(screen, 'Black', score_border, border_radius = 10)
-        screen.blit(score_surf, score_rect)
 
         if 0 > snail_rect.x > -72 :
             snail_rect.x -= 5
@@ -86,12 +91,27 @@ while True:
         screen.blit(player_surf, player_rect)
         # pygame.draw.rect(screen, 'Red3', player_hitbox, 1)
 
+
         if player_hitbox.colliderect(snail_hitbox):
             game = False
 
     else:
+        bg_surface.set_alpha(bg_alpha) # type:ignore
+        screen.blit(bg_surface, bg_rect)
+
+        if bg_alpha < 255:
+            bg_alpha += bg_change
+
         pygame.draw.rect(screen, 'Black', game_over_border, border_radius = 10)
         screen.blit(game_over_text, game_over_rect)
+
+    score_surf = test_font.render(f"Score : {score}", False, 'White').convert()
+    score_rect = score_surf.get_rect(centerx = width//2, top = 10)
+    score_border = score_rect.inflate(10, 5)
+    score_border.y -= 5
+    score_border.x -= 2
+    pygame.draw.rect(screen, 'Black', score_border, border_radius = 10)
+    screen.blit(score_surf, score_rect)
 
     pygame.display.update()
     clock.tick(60)
